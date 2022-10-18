@@ -1,5 +1,5 @@
 // import escapeHtml from "./utils/escape-html.js";
-import SortableList from '../../2-sortable-list/src/index.js';
+import SortableList from '../2-sortable-list/index.js';
 import fetchJson from "./utils/fetch-json.js";
 
 const IMGUR_CLIENT_ID = "28aaa2e823b03b1";
@@ -216,10 +216,12 @@ export default class ProductForm {
     `;
   }
 
-  get imageListTemplate() {
+  imageListTemplate() {
     return this.product.images.map((image) => {
-      return this.getImageTemplate(image);
-    }).join('');
+      const wrapper = document.createElement("div");
+      wrapper.innerHTML = this.getImageTemplate(image);
+      return wrapper.firstElementChild;
+    });
   }
 
   get productFormTemplate() {
@@ -293,7 +295,11 @@ export default class ProductForm {
   renderProductItem() {
     this.subElements.title.value = this.product.title;
     this.subElements.description.innerHTML = this.product.description;
-    this.subElements.imageList.innerHTML = this.imageListTemplate;
+    this.subElements.imageList.append(
+      new SortableList({
+        items: this.imageListTemplate(),
+      }).element
+    );
     this.subElements.price.value = this.product.price;
     this.subElements.discount.value = this.product.discount;
     this.subElements.quantity.value = this.product.quantity;
