@@ -217,6 +217,7 @@ export default class ProductForm {
   }
 
   imageListTemplate() {
+    console.log(this.product.images);
     return this.product.images.map((image) => {
       const wrapper = document.createElement("div");
       wrapper.innerHTML = this.getImageTemplate(image);
@@ -240,9 +241,7 @@ export default class ProductForm {
       </div>
       <div class="form-group form-group__wide" data-element="sortable-list-container">
         <label class="form-label">Фото</label>
-        <div data-element="imageListContainer">
-          <ul class="sortable-list" data-element='imageList'></ul>
-        </div>
+        <div data-element="imageListContainer"></div>
         <button id='uploadImage' type="button" name="uploadImage" class="button-primary-outline" data-element="uploadImage"><span>Загрузить</span></button>
       </div>
       <div class="form-group form-group__half_left">
@@ -295,7 +294,7 @@ export default class ProductForm {
   renderProductItem() {
     this.subElements.title.value = this.product.title;
     this.subElements.description.innerHTML = this.product.description;
-    this.subElements.imageList.append(
+    this.subElements.imageListContainer.append(
       new SortableList({
         items: this.imageListTemplate(),
       }).element
