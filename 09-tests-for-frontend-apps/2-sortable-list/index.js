@@ -1,6 +1,4 @@
 export default class SortableList {
-  subElements = {};
-
   constructor({ items = [] } = {}) {
     this.items = items;
 
@@ -19,10 +17,9 @@ export default class SortableList {
 
   onDragClick = (event) => {
     const onDrag = event.target.closest("[data-grab-handle]");
-    console.log(onDrag);
     if (onDrag) {
       event.preventDefault();
-      this.draggable = onDrag.closest("li");
+      this.draggable = event.target.closest("li");
       this.onDragItem(event);
     }
   };
@@ -32,13 +29,10 @@ export default class SortableList {
       x: event.clientX - this.draggable.getBoundingClientRect().x,
       y: event.clientY - this.draggable.getBoundingClientRect().y
     };
-    console.log(this.initialShift.x);
-    console.log(this.initialShift.y);
-    console.log(this.draggable.getBoundingClientRect());
 
     this.draggableCoords(event);
 
-    this.draggable.classList.add("sortable-list__item-dragging");
+    this.draggable.classList.add("sortable-list__item_dragging");
     this.draggable.before(this.addPlaceholder());
 
     document.addEventListener("pointermove", this.onMoveItem);
@@ -54,7 +48,7 @@ export default class SortableList {
     this.placeholder = document.createElement("li");
     this.placeholder.classList.add("sortable-list__placeholder");
     this.placeholder.classList.add("sortable-list__item");
-    // this.placeholder.style.background = "transparent";
+    this.placeholder.style.background = "transparent";
 
     return this.placeholder;
   }
@@ -62,41 +56,27 @@ export default class SortableList {
   onMoveItem = (event) => {
     this.draggableCoords(event);
 
-    console.log(event.pageX);
-    console.log(event.pageY);
-
     this.draggable.style.display = "none";
-    const droppedArea = document.elementFromPoint(event.pageX, event.pageY);
+    this.droppedArea = document.elementFromPoint(event.clientX, event.clientY);
     this.draggable.style.display = "block";
 
-    if (droppedArea.classList.contains("sortable-list__item")) {
-      droppedArea.before(this.placeholder);
+    if (this.droppedArea.classList.contains("sortable-list__item")) {
+      this.droppedArea.before(this.placeholder);
     } else {
       this.element.append(this.placeholder);
     }
   }
 
-  onDropItem = (event) => {
-    this.draggable.classList.remove("sortable-list__item-dragging");
+  onDropItem = () => {
+    this.placeholder.replaceWith(this.draggable);
 
-    this.placeholder.replaceWith(this.draggedItem);
+    this.draggable.classList.remove("sortable-list__item_dragging");
+    this.draggable.style = "";
+
+    this.placeholder.remove();
+    document.removeEventListener("pointermove", this.onMoveItem);
+    document.removeEventListener("pointerup", this.onDropItem);
   }
-
-  // get sortableListTemplate() {
-  //   return `
-  //     <ul class="sortable-list"></ul>
-  //   `;
-  //   //   <li class="categories__sortable-list-item sortable-list__item" data-grab-handle="" data-id="tovary-dlya-kuxni" style="">
-  //   //   <strong>Товары для кухни</strong>
-  //   //   <span><b>13</b> products</span>
-  //   // </li><li class="categories__sortable-list-item sortable-list__item" data-grab-handle="" data-id="krasota-i-zdorove">
-  //   //   <strong>Красота и здоровье</strong>
-  //   //   <span><b>11</b> products</span>
-  //   // </li><li class="categories__sortable-list-item sortable-list__item" data-grab-handle="" data-id="tovary-dlya-doma">
-  //   //   <strong>Товары для дома</strong>
-  //   //   <span><b>11</b> products</span>
-  //   // </li>
-  // }
 
   renderDraggables() {
     this.items.forEach((item) => {
@@ -109,26 +89,9 @@ export default class SortableList {
     this.element = document.createElement("ul");
     this.element.className = "sortable-list";
 
-    // element.innerHTML = this.sortableListTemplate;
-    // this.element = element.firstElementChild;
-    // this.subElements = this.getSubElements();
-
     this.renderDraggables();
     this.initListeners();
   }
-
-  // getSubElements() {
-  //   const result = {};
-  //   const elements = this.element.querySelectorAll("[data-element]");
-
-  //   for (const subElement of elements) {
-  //     const name = subElement.dataset.element;
-
-  //     result[name] = subElement;
-  //   }
-  //   console.log(result);
-  //   return result;
-  // }
 
   remove() {
     if (this.element) {
